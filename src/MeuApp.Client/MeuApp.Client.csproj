@@ -17,4 +17,22 @@
     <ProjectReference Include="..\MeuApp.Shared\MeuApp.Shared.csproj" />
   </ItemGroup>
 
+  <!--
+    Contorno de bug do SDK 10.0.1xx no Blazor WASM hospedado: quando o Server publica o Client, o SDK chama
+    o Client numa invocação separada em que o target de build que preenche _HtmlStaticWebAssets não roda.
+    Sem ele, o publish não substitui #[.{fingerprint}], o preload e o importmap, e o index.html some do
+    manifesto (em produção o navegador recebe o index.html cru e dá 404 em blazor.webassembly#[.{fingerprint}].js).
+    Aqui entregamos ao target de publish o wwwroot/index.html original, com os metadados do asset de build.
+    No publish do Client sozinho a lista já vem preenchida e este target não faz nada.
+  -->
+  <Target Name="IncluirIndexHtmlNoPublishHospedado"
+          BeforeTargets="GenerateHtmlAssetPlaceholdersPublishStaticWebAssets"
+          Condition="'@(_HtmlStaticWebAssets)' == ''">
+    <ItemGroup>
+      <_IndexHtmlDeBuild Include="@(StaticWebAsset)"
+                         Condition="'%(AssetKind)' == 'Build' and '%(SourceType)' == 'Computed' and '%(Extension)' == '.html' and $([System.String]::Copy('%(RelativePath)').StartsWith('index'))" />
+      <_HtmlStaticWebAssets Include="@(_IndexHtmlDeBuild->'$(MSBuildProjectDirectory)/wwwroot/index.html')" />
+    </ItemGroup>
+  </Target>
+
 </Project>

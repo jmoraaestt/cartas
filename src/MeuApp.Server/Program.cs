@@ -108,14 +108,14 @@ if (app.Environment.IsDevelopment())
     app.UseWebAssemblyDebugging();
 }
 
-app.UseBlazorFrameworkFiles();   // serve os arquivos do Client
-app.UseStaticFiles();
+app.UseBlazorFrameworkFiles();   // ajustes do Blazor WASM (header Blazor-Environment etc.)
 
 app.UseRouting();
 app.UseAuthentication();         // lê o cookie e monta o User
 app.UseAuthorization();          // aplica os [Authorize]
 app.UseRateLimiter();
 
+app.MapStaticAssets();           // arquivos do Client pelo manifesto do build: fingerprint, compressão e index.html processado
 app.MapGet("/health", () => Results.Ok()).AllowAnonymous();   // health check do Render
 app.MapControllers();            // /api/...
 app.MapFallbackToFile("index.html"); // qualquer outra rota Blazor
