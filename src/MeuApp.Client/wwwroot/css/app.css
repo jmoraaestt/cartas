@@ -362,6 +362,83 @@ textarea.form-control.texto-pautado {
     font-size: 0.9rem;
 }
 
+/* ===== Login ===== */
+.login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0 2rem;
+}
+
+.login__cartao {
+    width: min(100%, 24rem);
+}
+
+/* ===== Selo "lida" na lista de cartas ===== */
+.selo-leitura {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--lilas-claro);
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.selo-leitura--lida {
+    background: var(--rosa-claro);
+    color: var(--rosa-forte);
+}
+
+/* ===== Modal de confirmação ===== */
+.modal-fundo {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(59, 31, 92, 0.45);
+    animation: modal-aparecer 0.15s ease-out;
+}
+
+.modal-carta {
+    width: min(100%, 28rem);
+    gap: 0.75rem;
+    box-shadow: var(--sombra-elevada);
+    animation: modal-subir 0.2s ease-out;
+}
+
+    .modal-carta:focus {
+        outline: none;
+    }
+
+.modal-carta__titulo {
+    font-size: 1.35rem;
+    margin: 0;
+}
+
+.modal-carta__acoes {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+@keyframes modal-aparecer {
+    from { opacity: 0; }
+}
+
+@keyframes modal-subir {
+    from { opacity: 0; transform: translateY(0.75rem); }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .papel-carta {
         transition: none;
@@ -370,6 +447,11 @@ textarea.form-control.texto-pautado {
         a.papel-carta:hover {
             transform: none;
         }
+
+    .modal-fundo,
+    .modal-carta {
+        animation: none;
+    }
 }
 
 /* ===== Blazor ===== */

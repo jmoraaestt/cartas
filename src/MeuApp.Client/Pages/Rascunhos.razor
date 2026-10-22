@@ -1,7 +1,7 @@
 @page "/rascunhos"
+@attribute [Authorize(Roles = Papeis.Escritora)]
 @using MeuApp.Shared
 @inject HttpClient Http
-@inject IJSRuntime JS
 
 <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
     <h1 class="titulo-pagina">
@@ -50,7 +50,7 @@ else
                     <a href="escrever/@carta.Id" class="btn btn-sm btn-outline-primary">Editar</a>
                     <button class="btn btn-sm btn-primary"
                             disabled="@(publicandoId is not null)"
-                            @onclick="() => Publicar(carta)">
+                            @onclick="() => cartaParaPublicar = carta">
                         @(publicandoId == carta.Id ? "Publicando..." : "Publicar")
                     </button>
                 </div>
@@ -59,8 +59,19 @@ else
     </div>
 }
 
+<ModalConfirmacao Visivel="cartaParaPublicar is not null"
+                  Titulo="@($"Publicar \"{cartaParaPublicar?.Titulo}\"?")"
+                  TextoConfirmar="Publicar"
+                  TextoOcupado="Publicando..."
+                  Ocupado="publicandoId is not null"
+                  OnConfirmar="Publicar"
+                  OnCancelar="() => cartaParaPublicar = null">
+    <p class="mb-0">Depois de publicada ela não pode mais ser editada.</p>
+</ModalConfirmacao>
+
 @code {
     private List<Carta>? cartas;
+    private Carta? cartaParaPublicar;   // carta aguardando confirmação no modal
     private int? publicandoId;   // carta sendo enviada; bloqueia os botões enquanto isso
     private string? erro;
 
@@ -69,9 +80,9 @@ else
         cartas = await Http.GetFromJsonAsync<List<Carta>>("api/cartas/rascunhos");
     }
 
-    private async Task Publicar(Carta carta)
+    private async Task Publicar()
     {
-        if (!await JS.InvokeAsync<bool>("confirm", $"Publicar \"{carta.Titulo}\"? Depois de publicada ela não pode mais ser editada."))
+        if (cartaParaPublicar is not { } carta)
             return;
 
         publicandoId = carta.Id;
@@ -97,6 +108,7 @@ else
         finally
         {
             publicandoId = null;
+            cartaParaPublicar = null;
         }
     }
 }

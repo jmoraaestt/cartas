@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 
 <PageTitle>MeuApp</PageTitle>
 
@@ -10,9 +10,11 @@
     </h1>
     <p>Escreva cartinhas, guarde rascunhos e publique quando estiverem prontas.</p>
     <div class="d-flex flex-wrap justify-content-center gap-2">
-        <a href="escrever" class="btn btn-primary">
-            <Ornamento Tipo="TipoOrnamento.Coracao" /> Escrever
-        </a>
+        <AuthorizeView Roles="@Papeis.Escritora">
+            <a href="escrever" class="btn btn-primary">
+                <Ornamento Tipo="TipoOrnamento.Coracao" /> Escrever
+            </a>
+        </AuthorizeView>
         <a href="cartas" class="btn btn-outline-primary">Ler cartas</a>
     </div>
 </div>

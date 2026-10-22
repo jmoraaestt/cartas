@@ -1,4 +1,9 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using MeuApp.Client.Auth
+@inject HttpClient Http
+@inject ApiAuthenticationStateProvider Auth
+@inject NavigationManager Nav
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">
             <Ornamento Tipo="TipoOrnamento.Laco" /> MeuApp
@@ -11,26 +16,44 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <Ornamento Tipo="TipoOrnamento.Coracao" /> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="escrever">
-                <Ornamento Tipo="TipoOrnamento.Laco" /> Escrever
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="rascunhos">
-                <Ornamento Tipo="TipoOrnamento.Caveira" /> Rascunhos
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="cartas">
-                <Ornamento Tipo="TipoOrnamento.Coracao" /> Cartas
-            </NavLink>
-        </div>
+        <AuthorizeView>
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <Ornamento Tipo="TipoOrnamento.Coracao" /> Home
+                    </NavLink>
+                </div>
+                <AuthorizeView Roles="@Papeis.Escritora" Context="escritora">
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="escrever">
+                            <Ornamento Tipo="TipoOrnamento.Laco" /> Escrever
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="rascunhos">
+                            <Ornamento Tipo="TipoOrnamento.Caveira" /> Rascunhos
+                        </NavLink>
+                    </div>
+                </AuthorizeView>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="cartas">
+                        <Ornamento Tipo="TipoOrnamento.Coracao" /> Cartas
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <button type="button" class="nav-link botao-sair" title="Sair (@context.User.Identity?.Name)" @onclick="Sair">
+                        <Ornamento Tipo="TipoOrnamento.Estrela" /> Sair
+                    </button>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="login">
+                        <Ornamento Tipo="TipoOrnamento.Coracao" /> Entrar
+                    </NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
     </nav>
 </div>
 
@@ -42,5 +65,20 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task Sair()
+    {
+        try
+        {
+            await Http.PostAsync("api/auth/logout", null);
+        }
+        catch (HttpRequestException)
+        {
+            // mesmo sem servidor, segue para o login; o cookie expira sozinho
+        }
+
+        Auth.NotificarMudanca();
+        Nav.NavigateTo("login");
     }
 }

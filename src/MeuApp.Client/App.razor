@@ -1,6 +1,24 @@
 ﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <NotAuthorized>
+                @if (context.User.Identity?.IsAuthenticated != true)
+                {
+                    <RedirecionarLogin />
+                }
+                else
+                {
+                    <div class="estado-vazio">
+                        <Ornamento Tipo="TipoOrnamento.Caveira" Class="ornamento--preto" />
+                        <p>Esta página não é para o seu perfil.</p>
+                        <a href="cartas" class="btn btn-outline-primary">Ver cartas</a>
+                    </div>
+                }
+            </NotAuthorized>
+            <Authorizing>
+                <p>Carregando...</p>
+            </Authorizing>
+        </AuthorizeRouteView>
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
 </Router>

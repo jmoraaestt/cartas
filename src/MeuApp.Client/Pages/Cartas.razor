@@ -35,6 +35,18 @@ else
                 <small class="papel-carta__data">
                     Publicada em @carta.PublicadaEm?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
                 </small>
+                <AuthorizeView Roles="@Papeis.Escritora">
+                    @if (carta.LidaEm is { } lidaEm)
+                    {
+                        <span class="selo-leitura selo-leitura--lida">
+                            <Ornamento Tipo="TipoOrnamento.Coracao" /> Lida em @lidaEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="selo-leitura">Ainda não lida</span>
+                    }
+                </AuthorizeView>
             </a>
         }
     </div>

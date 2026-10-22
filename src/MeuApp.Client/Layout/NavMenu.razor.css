@@ -53,6 +53,24 @@
         color: var(--lilas);
     }
 
+    /* botão Sair com a mesma cara dos links */
+    .nav-item .botao-sair {
+        width: 100%;
+        background: none;
+        border: 0;
+        color: var(--lilas-claro);
+        border-radius: 999px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        padding-left: 1rem;
+    }
+
+        .nav-item .botao-sair:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--branco);
+        }
+
 .nav-item ::deep a.active {
     background-color: rgba(255, 111, 174, 0.3);
     color: var(--branco);

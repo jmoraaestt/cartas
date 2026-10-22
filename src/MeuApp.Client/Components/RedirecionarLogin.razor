@@ -1,0 +1,10 @@
+@* Manda para /login lembrando a página pedida, para voltar depois de entrar *@
+@inject NavigationManager Nav
+
+@code {
+    protected override void OnInitialized()
+    {
+        var voltar = Nav.ToBaseRelativePath(Nav.Uri);
+        Nav.NavigateTo(string.IsNullOrEmpty(voltar) ? "login" : $"login?voltar={Uri.EscapeDataString(voltar)}");
+    }
+}

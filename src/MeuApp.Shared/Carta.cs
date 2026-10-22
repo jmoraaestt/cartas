@@ -8,4 +8,5 @@ public class Carta
     public bool Publicada { get; set; }
     public DateTime CriadaEm { get; set; }
     public DateTime? PublicadaEm { get; set; }
+    public DateTime? LidaEm { get; set; }   // primeira leitura pela Leitora
 }

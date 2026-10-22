@@ -1,0 +1,79 @@
+@* Modal de confirmação sem JS: overlay + role="dialog"; Esc ou clique fora cancelam *@
+@if (Visivel)
+{
+    <div class="modal-fundo" @onclick="Cancelar">
+        <div class="modal-carta papel-carta" role="dialog" aria-modal="true"
+             aria-labelledby="modal-titulo" aria-describedby="modal-texto"
+             tabindex="-1" @ref="caixa"
+             @onclick:stopPropagation="true" @onkeydown="TeclaPressionada">
+            <h2 id="modal-titulo" class="modal-carta__titulo">
+                <Ornamento Tipo="TipoOrnamento.Coracao" Class="ornamento--rosa" /> @Titulo
+            </h2>
+            <div id="modal-texto">@ChildContent</div>
+            <div class="modal-carta__acoes">
+                <button type="button" class="btn btn-outline-primary"
+                        disabled="@Ocupado" @onclick="Cancelar">
+                    @TextoCancelar
+                </button>
+                <button type="button" class="btn btn-primary"
+                        disabled="@Ocupado" @onclick="OnConfirmar" @ref="botaoConfirmar">
+                    @(Ocupado ? TextoOcupado : TextoConfirmar)
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public bool Visivel { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Titulo { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public string TextoConfirmar { get; set; } = "Confirmar";
+
+    [Parameter]
+    public string TextoCancelar { get; set; } = "Cancelar";
+
+    [Parameter]
+    public string TextoOcupado { get; set; } = "Aguarde...";
+
+    [Parameter]
+    public bool Ocupado { get; set; }   // enquanto a ação roda, nada de fechar nem clicar de novo
+
+    [Parameter]
+    public EventCallback OnConfirmar { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancelar { get; set; }
+
+    private ElementReference caixa;
+    private ElementReference botaoConfirmar;
+    private bool estavaVisivel;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // foco vai pro botão principal só quando o modal acabou de abrir
+        if (Visivel && !estavaVisivel)
+            await botaoConfirmar.FocusAsync();
+
+        estavaVisivel = Visivel;
+    }
+
+    private async Task Cancelar()
+    {
+        if (!Ocupado)
+            await OnCancelar.InvokeAsync();
+    }
+
+    private async Task TeclaPressionada(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            await Cancelar();
+    }
+}

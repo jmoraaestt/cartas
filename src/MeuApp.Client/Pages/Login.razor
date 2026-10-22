@@ -1,0 +1,106 @@
+@page "/login"
+@attribute [AllowAnonymous]
+@using MeuApp.Client.Auth
+@using System.Net
+@inject HttpClient Http
+@inject ApiAuthenticationStateProvider Auth
+@inject NavigationManager Nav
+
+<PageTitle>Entrar · MeuApp</PageTitle>
+
+<div class="login">
+    <ImagemDecorativa Src="images/login.png"
+                      Alt="Ilustração de boas-vindas com uma cartinha"
+                      Class="decoracao-grande"
+                      Fallback="TipoOrnamento.Coracao" />
+
+    <EditForm Model="dados" OnValidSubmit="Entrar" class="papel-carta login__cartao">
+        <DataAnnotationsValidator />
+
+        <h1 class="titulo-pagina mb-2">
+            <Ornamento Tipo="TipoOrnamento.Laco" Class="ornamento--rosa" /> Entrar
+        </h1>
+
+        @if (erro is not null)
+        {
+            <div class="alert alert-danger mb-2" role="alert">@erro</div>
+        }
+
+        <div class="mb-2">
+            <label class="form-label" for="login">Login</label>
+            <InputText id="login" class="form-control" autocomplete="username" @bind-Value="dados.Login" />
+            <ValidationMessage For="() => dados.Login" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="senha">Senha</label>
+            <InputText id="senha" type="password" class="form-control" autocomplete="current-password" @bind-Value="dados.Senha" />
+            <ValidationMessage For="() => dados.Senha" />
+        </div>
+
+        <button class="btn btn-primary" disabled="@entrando">
+            @(entrando ? "Entrando..." : "Entrar")
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Voltar { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState> EstadoAuth { get; set; } = default!;
+
+    private LoginDto dados = new();
+    private bool entrando;
+    private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Já logada: não faz sentido ver o formulário
+        if ((await EstadoAuth).User.Identity?.IsAuthenticated == true)
+            Nav.NavigateTo(DestinoSeguro());
+    }
+
+    private async Task Entrar()
+    {
+        entrando = true;
+        erro = null;
+
+        try
+        {
+            var resposta = await Http.PostAsJsonAsync("api/auth/login", dados);
+
+            if (resposta.IsSuccessStatusCode)
+            {
+                Auth.NotificarMudanca();
+                Nav.NavigateTo(DestinoSeguro());
+                return;
+            }
+
+            erro = resposta.StatusCode switch
+            {
+                HttpStatusCode.Unauthorized => "Login ou senha incorretos. Confira e tente de novo.",
+                HttpStatusCode.TooManyRequests => "Muitas tentativas seguidas. Espere um minutinho e tente de novo.",
+                _ => "Não foi possível entrar agora. Tente de novo em instantes."
+            };
+            dados.Senha = "";
+        }
+        catch (HttpRequestException)
+        {
+            erro = "Não foi possível conectar ao servidor.";
+        }
+        finally
+        {
+            entrando = false;
+        }
+    }
+
+    // Só volta para caminhos internos do app (evita ?voltar=https://site-malicioso)
+    private string DestinoSeguro() =>
+        !string.IsNullOrEmpty(Voltar)
+        && Uri.IsWellFormedUriString(Voltar, UriKind.Relative)
+        && !Voltar.StartsWith('/') && !Voltar.StartsWith('\\')
+            ? Voltar
+            : "";
+}

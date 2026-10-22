@@ -1,5 +1,6 @@
 @page "/escrever"
 @page "/escrever/{Id:int}"
+@attribute [Authorize(Roles = Papeis.Escritora)]
 @using MeuApp.Shared
 @inject HttpClient Http
 @inject NavigationManager Nav
@@ -15,25 +16,35 @@
         <div class="alert alert-danger">@erro</div>
     }
 
-    <EditForm Model="carta" OnValidSubmit="Salvar" class="papel-carta">
-        <DataAnnotationsValidator />
-
-        <div class="mb-3">
-            <label class="form-label" for="titulo">Título</label>
-            <InputText id="titulo" class="form-control" @bind-Value="carta.Titulo" />
-            <ValidationMessage For="() => carta.Titulo" />
+    @if (publicada)
+    {
+        <div class="alert alert-info">
+            Esta carta já foi publicada e não pode mais ser editada.
+            <a href="cartas/@Id">Ler carta</a>
         </div>
+    }
+    else
+    {
+        <EditForm Model="carta" OnValidSubmit="Salvar" class="papel-carta">
+            <DataAnnotationsValidator />
 
-        <div class="mb-3">
-            <label class="form-label" for="conteudo">Carta</label>
-            <InputTextArea id="conteudo" class="form-control texto-pautado" rows="12" @bind-Value="carta.Conteudo" />
-            <ValidationMessage For="() => carta.Conteudo" />
-        </div>
+            <div class="mb-3">
+                <label class="form-label" for="titulo">Título</label>
+                <InputText id="titulo" class="form-control" @bind-Value="carta.Titulo" />
+                <ValidationMessage For="() => carta.Titulo" />
+            </div>
 
-        <div>
-            <button class="btn btn-primary" disabled="@salvando">Salvar rascunho</button>
-        </div>
-    </EditForm>
+            <div class="mb-3">
+                <label class="form-label" for="conteudo">Carta</label>
+                <InputTextArea id="conteudo" class="form-control texto-pautado" rows="12" @bind-Value="carta.Conteudo" />
+                <ValidationMessage For="() => carta.Conteudo" />
+            </div>
+
+            <div>
+                <button class="btn btn-primary" disabled="@salvando">Salvar rascunho</button>
+            </div>
+        </EditForm>
+    }
 </div>
 
 
@@ -44,6 +55,7 @@
 
     private NovaCartaDto carta = new();
     private bool salvando;
+    private bool publicada;   // carta já publicada: só leitura, sem formulário
     private string? erro;
 
     protected override async Task OnInitializedAsync()
@@ -57,9 +69,15 @@
         try
         {
             var existente = await Http.GetFromJsonAsync<Carta>($"api/cartas/{Id}");
+            if (existente!.Publicada)
+            {
+                publicada = true;
+                return;
+            }
+
             carta = new NovaCartaDto
             {
-                Titulo = existente!.Titulo,
+                Titulo = existente.Titulo,
                 Conteudo = existente.Conteudo
             };
         }
