@@ -1,13 +1,17 @@
 using MeuApp.Shared;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace MeuApp.Server.Data;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
     public DbSet<Carta> Cartas => Set<Carta>();
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+
+    // Chaves do Data Protection (cifram o cookie de login); ficam no banco para sobreviver a redeploys
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

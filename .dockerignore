@@ -1,0 +1,8 @@
+**/.env
+**/bin
+**/obj
+.git
+.vscode
+publish
+Dockerfile
+.dockerignore
