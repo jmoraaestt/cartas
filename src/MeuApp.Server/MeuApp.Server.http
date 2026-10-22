@@ -1,0 +1,6 @@
+@MeuApp.Server_HostAddress = http://localhost:5116
+
+GET {{MeuApp.Server_HostAddress}}/api/cartas/
+Accept: application/json
+
+###

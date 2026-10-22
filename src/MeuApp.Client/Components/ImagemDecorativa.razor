@@ -1,0 +1,38 @@
+@* Imagem opcional: se o arquivo não existir, mostra um ornamento discreto no mesmo espaço *@
+@if (falhou)
+{
+    <span class="imagem-decorativa imagem-decorativa--fallback @Class" aria-hidden="true">
+        <Ornamento Tipo="Fallback" />
+    </span>
+}
+else
+{
+    <img class="imagem-decorativa @Class" src="@Src" alt="@Alt" @onerror="() => falhou = true" />
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public string Src { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Alt { get; set; } = "";
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter]
+    public TipoOrnamento Fallback { get; set; } = TipoOrnamento.Coracao;
+
+    private bool falhou;
+    private string? srcAnterior;
+
+    protected override void OnParametersSet()
+    {
+        // Outra imagem: tenta carregar de novo
+        if (Src != srcAnterior)
+        {
+            falhou = false;
+            srcAnterior = Src;
+        }
+    }
+}

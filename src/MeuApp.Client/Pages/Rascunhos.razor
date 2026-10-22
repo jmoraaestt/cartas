@@ -1,0 +1,102 @@
+@page "/rascunhos"
+@using MeuApp.Shared
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+    <h1 class="titulo-pagina">
+        <Ornamento Tipo="TipoOrnamento.Caveira" Class="ornamento--preto" /> Rascunhos
+    </h1>
+    <a href="escrever" class="btn btn-primary">
+        <Ornamento Tipo="TipoOrnamento.Coracao" /> Nova carta
+    </a>
+</div>
+
+@if (erro is not null)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+
+@if (cartas is null)
+{
+    <p>Carregando...</p>
+}
+else if (cartas.Count == 0)
+{
+    <div class="estado-vazio">
+        <ImagemDecorativa Src="images/rascunhos-vazio.png"
+                          Alt="Ilustração de uma cartinha esperando para ser escrita"
+                          Class="decoracao-grande"
+                          Fallback="TipoOrnamento.Caveira" />
+        <p>Nenhum rascunho ainda.</p>
+        <a href="escrever" class="btn btn-outline-primary">Escrever a primeira carta</a>
+    </div>
+}
+else
+{
+    <div class="grade-cartas">
+        @foreach (var carta in cartas)
+        {
+            <div class="papel-carta">
+                <ImagemDecorativa Src="images/canto-carta.png"
+                                  Alt="Enfeite no canto da carta"
+                                  Class="decoracao-canto"
+                                  Fallback="TipoOrnamento.Laco" />
+                <h2 class="papel-carta__titulo">@carta.Titulo</h2>
+                <small class="papel-carta__data">
+                    @carta.CriadaEm.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                </small>
+                <div class="papel-carta__acoes">
+                    <a href="escrever/@carta.Id" class="btn btn-sm btn-outline-primary">Editar</a>
+                    <button class="btn btn-sm btn-primary"
+                            disabled="@(publicandoId is not null)"
+                            @onclick="() => Publicar(carta)">
+                        @(publicandoId == carta.Id ? "Publicando..." : "Publicar")
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Carta>? cartas;
+    private int? publicandoId;   // carta sendo enviada; bloqueia os botões enquanto isso
+    private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cartas = await Http.GetFromJsonAsync<List<Carta>>("api/cartas/rascunhos");
+    }
+
+    private async Task Publicar(Carta carta)
+    {
+        if (!await JS.InvokeAsync<bool>("confirm", $"Publicar \"{carta.Titulo}\"? Depois de publicada ela não pode mais ser editada."))
+            return;
+
+        publicandoId = carta.Id;
+        erro = null;
+
+        try
+        {
+            var resposta = await Http.PostAsync($"api/cartas/{carta.Id}/publicar", null);
+
+            if (resposta.IsSuccessStatusCode)
+            {
+                cartas!.Remove(carta);
+            }
+            else
+            {
+                erro = await resposta.Content.ReadAsStringAsync();
+            }
+        }
+        catch (HttpRequestException)
+        {
+            erro = "Não foi possível conectar ao servidor.";
+        }
+        finally
+        {
+            publicandoId = null;
+        }
+    }
+}

@@ -1,0 +1,58 @@
+@page "/cartas"
+@using MeuApp.Shared
+@inject HttpClient Http
+
+<h1 class="titulo-pagina mb-3">
+    <Ornamento Tipo="TipoOrnamento.Coracao" Class="ornamento--rosa" /> Cartas
+</h1>
+
+@if (erro is not null)
+{
+    <div class="alert alert-danger">@erro</div>
+}
+else if (cartas is null)
+{
+    <p>Carregando...</p>
+}
+else if (cartas.Count == 0)
+{
+    <div class="estado-vazio">
+        <Ornamento Tipo="TipoOrnamento.Estrela" Class="ornamento--lilas" />
+        <p>Nenhuma carta publicada ainda.</p>
+    </div>
+}
+else
+{
+    <div class="grade-cartas">
+        @foreach (var carta in cartas)
+        {
+            <a href="cartas/@carta.Id" class="papel-carta">
+                <ImagemDecorativa Src="images/canto-carta.png"
+                                  Alt="Enfeite no canto da carta"
+                                  Class="decoracao-canto"
+                                  Fallback="TipoOrnamento.Laco" />
+                <h2 class="papel-carta__titulo">@carta.Titulo</h2>
+                <small class="papel-carta__data">
+                    Publicada em @carta.PublicadaEm?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                </small>
+            </a>
+        }
+    </div>
+}
+
+@code {
+    private List<Carta>? cartas;
+    private string? erro;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            cartas = await Http.GetFromJsonAsync<List<Carta>>("api/cartas");
+        }
+        catch (HttpRequestException)
+        {
+            erro = "Não foi possível carregar as cartas.";
+        }
+    }
+}

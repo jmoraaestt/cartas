@@ -1,0 +1,81 @@
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Preto e roxo com poá rosinha bem apagado */
+.sidebar {
+    background-color: var(--preto);
+    background-image:
+        radial-gradient(rgba(255, 111, 174, 0.12) 15%, transparent 17%),
+        linear-gradient(180deg, var(--preto) 0%, var(--roxo-escuro) 100%);
+    background-size: 22px 22px, 100% 100%;
+}
+
+.cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--branco);
+    border-bottom: 3px dotted var(--rosa-borda);
+    box-shadow: 0 2px 12px rgba(107, 63, 160, 0.08);
+}
+
+.cabecalho__marca {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    font-weight: 600;
+    color: var(--rosa-forte);
+    text-align: center;
+}
+
+    .cabecalho__marca ::deep .ornamento {
+        width: 0.75em;
+        height: 0.75em;
+    }
+
+@media (max-width: 640.98px) {
+    .cabecalho {
+        padding: 0.5rem 1rem;
+    }
+
+        .cabecalho ::deep .decoracao-personagem {
+            width: 3rem;
+            height: 3rem;
+        }
+
+    /* em tela pequena só caveira e coração */
+    .cabecalho__marca ::deep .ornamento:first-child,
+    .cabecalho__marca ::deep .ornamento:last-child {
+        display: none;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .cabecalho, article {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}

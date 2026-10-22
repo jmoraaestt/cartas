@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MeuApp.Client/MeuApp.Client.csproj" />
+    <Project Path="src/MeuApp.Server/MeuApp.Server.csproj" />
+    <Project Path="src/MeuApp.Shared/MeuApp.Shared.csproj" />
+  </Folder>
+</Solution>

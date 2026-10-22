@@ -1,0 +1,64 @@
+@page "/cartas/{Id:int}"
+@using MeuApp.Shared
+@inject HttpClient Http
+
+<div class="leitura">
+    <a href="cartas" class="btn btn-sm btn-outline-secondary mb-4">← Voltar</a>
+
+    @if (erro is not null)
+    {
+        <div class="alert alert-danger">@erro</div>
+    }
+    else if (carta is null)
+    {
+        <p>Carregando...</p>
+    }
+    else
+    {
+        <article class="leitura papel-carta">
+            <ImagemDecorativa Src="images/canto-carta.png"
+                              Alt="Enfeite no canto da carta"
+                              Class="decoracao-canto"
+                              Fallback="TipoOrnamento.Laco" />
+            <h1>@carta.Titulo</h1>
+            <p class="text-muted mb-0">
+                Publicada em @carta.PublicadaEm?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+            </p>
+            <div class="divisor-fofo">
+                <Ornamento Tipo="TipoOrnamento.Estrela" />
+                <Ornamento Tipo="TipoOrnamento.Coracao" Class="ornamento--rosa" />
+                <Ornamento Tipo="TipoOrnamento.Estrela" />
+            </div>
+            <div class="texto-pautado">@carta.Conteudo</div>
+        </article>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Carta? carta;
+    private string? erro;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        carta = null;
+        erro = null;
+
+        try
+        {
+            var encontrada = await Http.GetFromJsonAsync<Carta>($"api/cartas/{Id}");
+
+            // A API também devolve rascunhos por id; aqui só mostramos publicadas
+            if (encontrada is null || !encontrada.Publicada)
+                erro = "Carta não encontrada.";
+            else
+                carta = encontrada;
+        }
+        catch (HttpRequestException)
+        {
+            erro = "Carta não encontrada.";
+        }
+    }
+}

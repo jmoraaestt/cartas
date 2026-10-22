@@ -1,0 +1,32 @@
+﻿@inherits LayoutComponentBase
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <header class="cabecalho">
+            <ImagemDecorativa Src="images/personagem-1.png"
+                              Alt="Personagem decorativo no lado esquerdo do cabeçalho"
+                              Class="decoracao-personagem"
+                              Fallback="TipoOrnamento.Laco" />
+
+            <div class="cabecalho__marca">
+                <Ornamento Tipo="TipoOrnamento.Estrela" Class="ornamento--lilas" />
+                <Ornamento Tipo="TipoOrnamento.Caveira" Class="ornamento--preto" />
+                <span>Cartinhas</span>
+                <Ornamento Tipo="TipoOrnamento.Coracao" Class="ornamento--rosa" />
+                <Ornamento Tipo="TipoOrnamento.Estrela" Class="ornamento--lilas" />
+            </div>
+
+            <ImagemDecorativa Src="images/personagem-2.png"
+                              Alt="Personagem decorativo no lado direito do cabeçalho"
+                              Class="decoracao-personagem"
+                              Fallback="TipoOrnamento.Laco" />
+        </header>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
